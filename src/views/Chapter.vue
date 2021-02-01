@@ -156,6 +156,7 @@ export default {
         that.$store.commit("setReadingBook", book);
         var index = that.$store.state.readingBook.index || 0;
         this.getContent(index);
+        window.addEventListener('scroll', this.handleScroll);
         window.addEventListener('keyup', function (event) {
           switch (event.key) {
             case 'ArrowLeft':
@@ -240,6 +241,7 @@ export default {
       content: [],
       noPoint: true,
       isNight: this.$store.state.config.theme == 6,
+      oldY:0,
       bodyTheme: {
         background: config.themes[this.$store.state.config.theme].body
       },
@@ -309,6 +311,17 @@ export default {
     }
   },
   methods: {
+      handleScroll () {
+        let bookUrl = sessionStorage.getItem("bookUrl");
+        let scrollY = window.scrollY;
+        if (scrollY - this.oldY > 1000) {
+         Axios.get(
+          "/saveReadRecord?url=" +
+          encodeURIComponent(bookUrl)
+            );
+            this.oldY = scrollY
+        }
+     },
     getCatalog(bookUrl) {
       return Axios.get(
           "/getChapterList?url=" +
@@ -340,6 +353,10 @@ export default {
       //强制滚回顶层
       jump(this.$refs.top, { duration: 0 });
       let that = this;
+       Axios.get(
+        "/saveReadRecord?url=" +
+        encodeURIComponent(bookUrl)
+          );
       Axios.get(
         "/getBookContent?url=" +
           encodeURIComponent(bookUrl) + "&index=" + chapterIndex
@@ -367,12 +384,15 @@ export default {
       );
     },
     toTop() {
-      jump(this.$refs.top);
+    jump(this.$refs.top);
+    this.oldY=window.scrollY
     },
     toBottom() {
       jump(this.$refs.bottom);
+      this.oldY=window.scrollY
     },
     toNextChapter() {
+        this.oldY=0
       this.$store.commit("setContentLoading", true);
       let index = this.$store.state.readingBook.index;
       index++;
@@ -384,7 +404,8 @@ export default {
       }
     },
     toLastChapter() {
-      this.$store.commit("setContentLoading", true);
+        this.oldY=0
+        this.$store.commit("setContentLoading", true);
       let index = this.$store.state.readingBook.index;
       index--;
       if (typeof this.$store.state.readingBook.catalog[index] !== "undefined") {
