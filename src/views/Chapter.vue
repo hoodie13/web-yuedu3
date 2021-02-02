@@ -158,6 +158,7 @@ export default {
         this.getContent(index);
         window.addEventListener("scroll", this.handleScroll);
         window.addEventListener("keyup", function(event) {
+          let t = new Date().getTime();
           switch (event.key) {
             case "ArrowLeft":
               event.stopPropagation();
@@ -170,21 +171,27 @@ export default {
               that.toNextChapter();
               break;
             case "ArrowUp":
-              event.stopPropagation();
-              event.preventDefault();
-              if (document.documentElement.scrollTop === 0) {
-                that.$message.warning("已到达页面顶部");
-              } else {
-                jump(0 - document.documentElement.clientHeight + 100);
+              if(t - this.oldT2 > 500) {
+                event.stopPropagation();
+                event.preventDefault();
+                if (document.documentElement.scrollTop === 0) {
+                  that.$message.warning("已到达页面顶部");
+                } else {
+                  jump(0 - document.documentElement.clientHeight + 200);
+                }
+                this.oldT2 = t
               }
               break;
             case "ArrowDown":
-              event.stopPropagation();
-              event.preventDefault();
-              if (document.documentElement.clientHeight + document.documentElement.scrollTop === document.documentElement.scrollHeight) {
-                that.$message.warning("已到达页面底部");
-              } else {
-                jump(document.documentElement.clientHeight - 100);
+              if(t - this.oldT2 > 500) {
+                event.stopPropagation();
+                event.preventDefault();
+                if (document.documentElement.clientHeight + document.documentElement.scrollTop === document.documentElement.scrollHeight) {
+                  that.$message.warning("已到达页面底部");
+                } else {
+                  jump(document.documentElement.clientHeight - 200);
+                }
+                this.oldT2 = t
               }
               break;
           }
@@ -243,6 +250,7 @@ export default {
       isNight: this.$store.state.config.theme == 6,
       oldY: 0,
       oldT: new Date().getTime(),
+      oldT2: new Date().getTime(),
       bodyTheme: {
         background: config.themes[this.$store.state.config.theme].body
       },
