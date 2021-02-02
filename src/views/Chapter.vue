@@ -156,20 +156,20 @@ export default {
         that.$store.commit("setReadingBook", book);
         var index = that.$store.state.readingBook.index || 0;
         this.getContent(index);
-        window.addEventListener('scroll', this.handleScroll);
-        window.addEventListener('keyup', function (event) {
+        window.addEventListener("scroll", this.handleScroll);
+        window.addEventListener("keyup", function(event) {
           switch (event.key) {
-            case 'ArrowLeft':
+            case "ArrowLeft":
               event.stopPropagation();
               event.preventDefault();
               that.toLastChapter();
               break;
-            case 'ArrowRight':
+            case "ArrowRight":
               event.stopPropagation();
               event.preventDefault();
               that.toNextChapter();
               break;
-            case 'ArrowUp':
+            case "ArrowUp":
               event.stopPropagation();
               event.preventDefault();
               if (document.documentElement.scrollTop === 0) {
@@ -178,7 +178,7 @@ export default {
                 jump(0 - document.documentElement.clientHeight + 100);
               }
               break;
-            case 'ArrowDown':
+            case "ArrowDown":
               event.stopPropagation();
               event.preventDefault();
               if (document.documentElement.clientHeight + document.documentElement.scrollTop === document.documentElement.scrollHeight) {
@@ -241,7 +241,8 @@ export default {
       content: [],
       noPoint: true,
       isNight: this.$store.state.config.theme == 6,
-      oldY:0,
+      oldY: 0,
+      oldT: new Date().getTime(),
       bodyTheme: {
         background: config.themes[this.$store.state.config.theme].body
       },
@@ -311,17 +312,21 @@ export default {
     }
   },
   methods: {
-      handleScroll () {
-        let bookUrl = sessionStorage.getItem("bookUrl");
-        let scrollY = window.scrollY;
-        if (scrollY - this.oldY > 1000) {
-         Axios.get(
-          "/saveReadRecord?url=" +
-          encodeURIComponent(bookUrl)
-            );
-            this.oldY = scrollY
-        }
-     },
+    handleScroll() {
+      let scrollY = window.scrollY;
+      let t = new Date().getTime();
+      //阅读超过1分钟保存一次阅读进度
+      if (scrollY - this.oldY > 500 && t - this.oldT > 60000) {
+        this.saveRecord();
+        this.oldT = t;
+        this.oldY = scrollY;
+      }
+    },
+    saveRecord() {
+      let bookUrl = sessionStorage.getItem("bookUrl");
+      Axios.get("/saveReadRecord?url=" + encodeURIComponent(bookUrl));
+      this.$message.info("存储进度中...");
+    },
     getCatalog(bookUrl) {
       return Axios.get(
           "/getChapterList?url=" +
@@ -353,10 +358,6 @@ export default {
       //强制滚回顶层
       jump(this.$refs.top, { duration: 0 });
       let that = this;
-       Axios.get(
-        "/saveReadRecord?url=" +
-        encodeURIComponent(bookUrl)
-          );
       Axios.get(
         "/getBookContent?url=" +
           encodeURIComponent(bookUrl) + "&index=" + chapterIndex
@@ -384,15 +385,12 @@ export default {
       );
     },
     toTop() {
-    jump(this.$refs.top);
-    this.oldY=window.scrollY
+      jump(this.$refs.top);
     },
     toBottom() {
       jump(this.$refs.bottom);
-      this.oldY=window.scrollY
     },
     toNextChapter() {
-        this.oldY=0
       this.$store.commit("setContentLoading", true);
       let index = this.$store.state.readingBook.index;
       index++;
@@ -402,10 +400,10 @@ export default {
       } else {
         this.$message.error("本章是最后一章");
       }
+      this.saveRecord();
     },
     toLastChapter() {
-        this.oldY=0
-        this.$store.commit("setContentLoading", true);
+      this.$store.commit("setContentLoading", true);
       let index = this.$store.state.readingBook.index;
       index--;
       if (typeof this.$store.state.readingBook.catalog[index] !== "undefined") {
@@ -414,9 +412,11 @@ export default {
       } else {
         this.$message.error("本章是第一章");
       }
+      this.saveRecord();
     },
     toShelf() {
       this.$router.push("/");
+      this.saveRecord()();
     }
   }
 };
