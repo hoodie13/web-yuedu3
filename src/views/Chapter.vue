@@ -326,6 +326,8 @@ export default {
       //阅读超过1分钟保存一次阅读进度
       if (scrollY - this.oldY > 500 && t - this.oldT > 60000) {
         this.saveRecord();
+        this.oldT = t;
+        this.oldY = scrollY;
       }
     },
     saveRecord() {
