@@ -171,7 +171,7 @@ export default {
               that.toNextChapter();
               break;
             case "ArrowUp":
-              if(t - this.oldT2 > 500) {
+              if (t - this.oldT2 > 500) {
                 event.stopPropagation();
                 event.preventDefault();
                 if (document.documentElement.scrollTop === 0) {
@@ -179,11 +179,11 @@ export default {
                 } else {
                   jump(0 - document.documentElement.clientHeight + 200);
                 }
-                this.oldT2 = t
+                this.oldT2 = t;
               }
               break;
             case "ArrowDown":
-              if(t - this.oldT2 > 500) {
+              if (t - this.oldT2 > 500) {
                 event.stopPropagation();
                 event.preventDefault();
                 if (document.documentElement.clientHeight + document.documentElement.scrollTop === document.documentElement.scrollHeight) {
@@ -191,7 +191,7 @@ export default {
                 } else {
                   jump(document.documentElement.clientHeight - 200);
                 }
-                this.oldT2 = t
+                this.oldT2 = t;
               }
               break;
           }
@@ -326,14 +326,14 @@ export default {
       //阅读超过1分钟保存一次阅读进度
       if (scrollY - this.oldY > 500 && t - this.oldT > 60000) {
         this.saveRecord();
-        this.oldT = t;
-        this.oldY = scrollY;
       }
     },
     saveRecord() {
       let bookUrl = sessionStorage.getItem("bookUrl");
       Axios.get("/saveReadRecord?url=" + encodeURIComponent(bookUrl));
       this.$message.info("存储进度中...");
+      this.oldT = new Date().getTime();
+      this.oldY = window.scrollY;
     },
     getCatalog(bookUrl) {
       return Axios.get(
