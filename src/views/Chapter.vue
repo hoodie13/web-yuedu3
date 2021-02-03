@@ -332,12 +332,21 @@ export default {
         this.oldT = t;
         this.oldY = scrollY;
         this.saveRecord();
-        this.$message.info("存储进度中...");
       }
     },
     saveRecord() {
+      var totalH =
+        document.body.scrollHeight || document.documentElement.scrollHeight;
+      var clientH = window.innerHeight || document.documentElement.clientHeight;
+      var validH = totalH - clientH;
+      var scrollH =
+        document.body.scrollTop || document.documentElement.scrollTop;
+      var result = ((scrollH / validH) * 100).toFixed(2);
+      //window.console.log(result);
       let bookUrl = sessionStorage.getItem("bookUrl");
-      Axios.get("/saveReadRecord?url=" + encodeURIComponent(bookUrl));
+      Axios.get(
+        "/saveReadRecord?url=" + encodeURIComponent(bookUrl) + "&pos=" + result
+      );
       this.oldT = new Date().getTime();
       this.oldY = window.scrollY;
     },
