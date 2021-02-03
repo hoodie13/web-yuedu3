@@ -186,7 +186,11 @@ export default {
               if (t - this.oldT2 > 500) {
                 event.stopPropagation();
                 event.preventDefault();
-                if (document.documentElement.clientHeight + document.documentElement.scrollTop === document.documentElement.scrollHeight) {
+                if (
+                  document.documentElement.clientHeight +
+                    document.documentElement.scrollTop ===
+                  document.documentElement.scrollHeight
+                ) {
                   that.$message.warning("已到达页面底部");
                 } else {
                   jump(document.documentElement.clientHeight - 200);
@@ -325,23 +329,20 @@ export default {
       let t = new Date().getTime();
       //阅读超过1分钟保存一次阅读进度
       if (scrollY - this.oldY > 500 && t - this.oldT > 60000) {
-        this.saveRecord();
         this.oldT = t;
         this.oldY = scrollY;
+        this.saveRecord();
+        this.$message.info("存储进度中...");
       }
     },
     saveRecord() {
       let bookUrl = sessionStorage.getItem("bookUrl");
       Axios.get("/saveReadRecord?url=" + encodeURIComponent(bookUrl));
-      this.$message.info("存储进度中...");
       this.oldT = new Date().getTime();
       this.oldY = window.scrollY;
     },
     getCatalog(bookUrl) {
-      return Axios.get(
-          "/getChapterList?url=" +
-          encodeURIComponent(bookUrl)
-      );
+      return Axios.get("/getChapterList?url=" + encodeURIComponent(bookUrl));
     },
     getContent(index) {
       //展示进度条
@@ -370,7 +371,9 @@ export default {
       let that = this;
       Axios.get(
         "/getBookContent?url=" +
-          encodeURIComponent(bookUrl) + "&index=" + chapterIndex
+          encodeURIComponent(bookUrl) +
+          "&index=" +
+          chapterIndex
       ).then(
         res => {
           let data = res.data.data;

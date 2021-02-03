@@ -25,7 +25,13 @@
           <el-tag
             type="warning"
             class="recent-book"
-            @click="toDetail(readingRecent.url, readingRecent.name, readingRecent.chapterIndex)"
+            @click="
+              toDetail(
+                readingRecent.url,
+                readingRecent.name,
+                readingRecent.chapterIndex
+              )
+            "
             :class="{ 'no-point': readingRecent.url == '' }"
           >
             {{ readingRecent.name }}
@@ -67,18 +73,13 @@
             <div class="cover-img">
               <img
                 class="cover"
-                :src="
-                    book.coverUrl ||
-                    require('../assets/imgs/noCover.jpeg')
-                "
+                :src="book.coverUrl || require('../assets/imgs/noCover.jpeg')"
                 alt=""
               />
             </div>
             <div
               class="info"
-              @click="
-                toDetail(book.bookUrl, book.name, book.durChapterIndex)
-              "
+              @click="toDetail(book.bookUrl, book.name, book.durChapterIndex)"
             >
               <div class="name">{{ book.name }}</div>
               <div class="sub">
@@ -89,7 +90,9 @@
                 <div class="size">共{{ book.totalChapterNum }}章</div>
               </div>
               <div class="dur-chapter">已读：{{ book.durChapterTitle }}</div>
-              <div class="last-chapter">最新：{{ book.latestChapterTitle }}</div>
+              <div class="last-chapter">
+                最新：{{ book.latestChapterTitle }}
+              </div>
             </div>
           </div>
         </div>
@@ -137,15 +140,15 @@ export default {
         that.loading.close();
         that.$store.commit("setConnectType", "success");
         that.$store.commit("increaseBookNum", response.data.data.length);
-        that.$store.commit("addBooks", response.data.data.sort(function (a, b) {
-          var x = a["durChapterTime"] || 0;
-          var y = b["durChapterTime"] || 0;
-          return y - x;
-        }));
         that.$store.commit(
-          "setConnectStatus",
-          "已连接 "
+          "addBooks",
+          response.data.data.sort(function(a, b) {
+            var x = a["durChapterTime"] || 0;
+            var y = b["durChapterTime"] || 0;
+            return y - x;
+          })
         );
+        that.$store.commit("setConnectStatus", "已连接 ");
         that.$store.commit("setNewConnect", false);
       })
       .catch(function(error) {
@@ -158,8 +161,7 @@ export default {
       });
   },
   methods: {
-    setIP() {
-    },
+    setIP() {},
     toDetail(bookUrl, bookName, chapterIndex) {
       sessionStorage.setItem("bookUrl", bookUrl);
       sessionStorage.setItem("bookName", bookName);
