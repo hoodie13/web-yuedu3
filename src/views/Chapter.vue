@@ -328,27 +328,39 @@ export default {
       let scrollY = window.scrollY;
       let t = new Date().getTime();
       //阅读超过1分钟保存一次阅读进度
-      if (scrollY - this.oldY > 500 && t - this.oldT > 60000) {
+      if (scrollY - this.oldY > 500 && t - this.oldT > 1000) {
         this.oldT = t;
         this.oldY = scrollY;
         this.saveRecord();
       }
     },
     saveRecord() {
-      var totalH =
+      let totalH =
         document.body.scrollHeight || document.documentElement.scrollHeight;
-      var clientH = window.innerHeight || document.documentElement.clientHeight;
-      var validH = totalH - clientH;
-      var scrollH =
+      let clientH = window.innerHeight || document.documentElement.clientHeight;
+      let validH = totalH - clientH;
+      let scrollH =
         document.body.scrollTop || document.documentElement.scrollTop;
-      var result = ((scrollH / validH) * 100).toFixed(2);
-      //window.console.log(result);
-      let bookUrl = sessionStorage.getItem("bookUrl");
-      Axios.get(
-        "/saveReadRecord?url=" + encodeURIComponent(bookUrl) + "&pos=" + result
-      );
-      this.oldT = new Date().getTime();
-      this.oldY = window.scrollY;
+      let index = this.$store.state.readingBook.index;
+      let len = this.$store.state.readingBook.catalog[index].len;
+      let chapterIndex = this.$store.state.readingBook.catalog[index].index;
+      let pos = ((len * scrollH) / validH).toFixed(0);
+      if (pos == null) pos = 0;
+      if (chapterIndex != null) {
+        window.console.log(
+          "chapterIndex is " +
+            chapterIndex +
+            " len is " +
+            len +
+            " pos is " +
+            pos
+        );
+        Axios.get(
+          "/saveReadRecord?chapterIndex=" + chapterIndex + "&pos=" + pos
+        );
+        this.oldT = new Date().getTime();
+        this.oldY = window.scrollY;
+      }
     },
     getCatalog(bookUrl) {
       return Axios.get("/getChapterList?url=" + encodeURIComponent(bookUrl));
@@ -386,6 +398,7 @@ export default {
       ).then(
         res => {
           let data = res.data.data;
+          this.$store.state.readingBook.catalog[index].len = data.length;
           let dataArray = data.split("\n\n");
           let contentData = "";
           if (dataArray.length > 1) {
@@ -422,7 +435,6 @@ export default {
       } else {
         this.$message.error("本章是最后一章");
       }
-      this.saveRecord();
     },
     toLastChapter() {
       this.$store.commit("setContentLoading", true);
@@ -434,11 +446,10 @@ export default {
       } else {
         this.$message.error("本章是第一章");
       }
-      this.saveRecord();
     },
     toShelf() {
       this.$router.push("/");
-      this.saveRecord()();
+      this.saveRecord();
     }
   }
 };
