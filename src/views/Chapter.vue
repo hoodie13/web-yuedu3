@@ -140,12 +140,15 @@ export default {
     let bookUrl = sessionStorage.getItem("bookUrl");
     let bookName = sessionStorage.getItem("bookName");
     let chapterIndex = sessionStorage.getItem("chapterIndex") || 0;
+    let chapterPos = sessionStorage.getItem("chapterPos");
     var book = JSON.parse(localStorage.getItem(bookUrl));
+    window.console.log(chapterPos);
     if (book == null || chapterIndex > 0) {
       book = {
         bookName: bookName,
         bookUrl: bookUrl,
-        index: chapterIndex
+        index: chapterIndex,
+        chapterPos: chapterPos
       };
       localStorage.setItem(bookUrl, JSON.stringify(book));
     }
@@ -423,7 +426,20 @@ export default {
       jump(this.$refs.top);
     },
     toBottom() {
-      jump(this.$refs.bottom);
+      let totalH =
+        document.body.scrollHeight || document.documentElement.scrollHeight;
+      let clientH = window.innerHeight || document.documentElement.clientHeight;
+      let validH = totalH - clientH;
+      let index = this.$store.state.readingBook.index;
+      let len = this.$store.state.readingBook.catalog[index].len;
+      let chapterPos = this.$store.state.readingBook.chapterPos;
+      let scrollH = (validH * chapterPos) / len;
+      window.console.log("跳转调试");
+      window.console.log(scrollH);
+      window.console.log(validH);
+      window.console.log(chapterPos);
+      window.console.log(len);
+      document.documentElement.scrollTop = scrollH;
     },
     toNextChapter() {
       this.$store.commit("setContentLoading", true);

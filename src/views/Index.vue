@@ -29,7 +29,8 @@
               toDetail(
                 readingRecent.url,
                 readingRecent.name,
-                readingRecent.chapterIndex
+                readingRecent.chapterIndex,
+                book.durChapterPos
               )
             "
             :class="{ 'no-point': readingRecent.url == '' }"
@@ -68,7 +69,14 @@
             class="book"
             v-for="book in shelf"
             :key="book.noteUrl"
-            @click="toDetail(book.bookUrl, book.name, book.durChapterIndex)"
+            @click="
+              toDetail(
+                book.bookUrl,
+                book.name,
+                book.durChapterIndex,
+                book.durChapterPos
+              )
+            "
           >
             <div class="cover-img">
               <img
@@ -79,7 +87,14 @@
             </div>
             <div
               class="info"
-              @click="toDetail(book.bookUrl, book.name, book.durChapterIndex)"
+              @click="
+                toDetail(
+                  book.bookUrl,
+                  book.name,
+                  book.durChapterIndex,
+                  book.durChapterPos
+                )
+              "
             >
               <div class="name">{{ book.name }}</div>
               <div class="sub">
@@ -162,14 +177,16 @@ export default {
   },
   methods: {
     setIP() {},
-    toDetail(bookUrl, bookName, chapterIndex) {
+    toDetail(bookUrl, bookName, chapterIndex, chapterPos) {
       sessionStorage.setItem("bookUrl", bookUrl);
       sessionStorage.setItem("bookName", bookName);
       sessionStorage.setItem("chapterIndex", chapterIndex);
+      sessionStorage.setItem("chapterPos", chapterPos);
       this.readingRecent = {
         name: bookName,
         url: bookUrl,
-        chapterIndex: chapterIndex
+        chapterIndex: chapterIndex,
+        chapterPos: chapterIndex
       };
       localStorage.setItem("readingRecent", JSON.stringify(this.readingRecent));
       this.$router.push({
