@@ -68,7 +68,7 @@
           <div class="iconfont">
             &#58915;
           </div>
-          <div class="icon-text">底部</div>
+          <div class="icon-text">最新</div>
         </div>
       </div>
     </div>
@@ -139,19 +139,28 @@ export default {
     const that = this;
     let bookUrl = sessionStorage.getItem("bookUrl");
     let bookName = sessionStorage.getItem("bookName");
-    let chapterIndex = sessionStorage.getItem("chapterIndex") || 0;
-    let chapterPos = sessionStorage.getItem("chapterPos");
     var book = JSON.parse(localStorage.getItem(bookUrl));
-    window.console.log(chapterPos);
-    if (book == null || chapterIndex > 0) {
-      book = {
-        bookName: bookName,
-        bookUrl: bookUrl,
-        index: chapterIndex,
-        chapterPos: chapterPos
-      };
-      localStorage.setItem(bookUrl, JSON.stringify(book));
-    }
+    this.getBook(bookUrl).then(
+      res => {
+        let newBook = res.data.data;
+        let chapterIndex = newBook.durChapterIndex;
+        let chapterPos = newBook.durChapterPos;
+        if (book == null || chapterIndex > 0) {
+          book = {
+            bookName: bookName,
+            bookUrl: bookUrl,
+            index: chapterIndex,
+            chapterPos: chapterPos
+          };
+          localStorage.setItem(bookUrl, JSON.stringify(book));
+        }
+      },
+      err => {
+        that.loading.close();
+        that.$message.error("获取书籍失败");
+        throw err;
+      }
+    );
     this.getCatalog(bookUrl).then(
       res => {
         let catalog = res.data.data;
@@ -331,7 +340,7 @@ export default {
       let scrollY = window.scrollY;
       let t = new Date().getTime();
       //阅读超过1分钟保存一次阅读进度
-      if (scrollY - this.oldY > 500 && t - this.oldT > 1000) {
+      if (scrollY - this.oldY > 500 && t - this.oldT > 30000) {
         this.oldT = t;
         this.oldY = scrollY;
         this.saveRecord();
@@ -348,6 +357,7 @@ export default {
       let len = this.$store.state.readingBook.catalog[index].len;
       let chapterIndex = this.$store.state.readingBook.catalog[index].index;
       let pos = ((len * scrollH) / validH).toFixed(0);
+      let bookUrl = sessionStorage.getItem("bookUrl");
       if (pos == null) pos = 0;
       if (chapterIndex != null) {
         window.console.log(
@@ -359,11 +369,21 @@ export default {
             pos
         );
         Axios.get(
-          "/saveReadRecord?chapterIndex=" + chapterIndex + "&pos=" + pos
+          "/saveReadRecord?url=" +
+            encodeURIComponent(bookUrl) +
+            "&chapterIndex=" +
+            chapterIndex +
+            "&pos=" +
+            pos
         );
+        this.$store.state.readingBook.chapterIndex = chapterIndex;
+        this.$store.state.readingBook.chapterPos = pos;
         this.oldT = new Date().getTime();
         this.oldY = window.scrollY;
       }
+    },
+    getBook(bookUrl) {
+      return Axios.get("/getBook?url=" + encodeURIComponent(bookUrl));
     },
     getCatalog(bookUrl) {
       return Axios.get("/getChapterList?url=" + encodeURIComponent(bookUrl));
@@ -414,6 +434,12 @@ export default {
           that.loading.close();
           that.noPoint = false;
           that.$store.commit("setShowContent", true);
+          let pos = this.$store.state.readingBook.chapterPos;
+          if (pos != 0) {
+            this.$message.info(
+              "当前章最新进度索引为" + pos + "，请点击最新进行阅读"
+            );
+          }
         },
         err => {
           that.$message.error("获取章节内容失败");
@@ -434,11 +460,6 @@ export default {
       let len = this.$store.state.readingBook.catalog[index].len;
       let chapterPos = this.$store.state.readingBook.chapterPos;
       let scrollH = (validH * chapterPos) / len;
-      window.console.log("跳转调试");
-      window.console.log(scrollH);
-      window.console.log(validH);
-      window.console.log(chapterPos);
-      window.console.log(len);
       document.documentElement.scrollTop = scrollH;
     },
     toNextChapter() {
@@ -446,7 +467,7 @@ export default {
       let index = this.$store.state.readingBook.index;
       index++;
       if (typeof this.$store.state.readingBook.catalog[index] !== "undefined") {
-        this.$message.info("下一章");
+        this.$store.state.readingBook.chapterPos = 0;
         this.getContent(index);
       } else {
         this.$message.error("本章是最后一章");
@@ -457,7 +478,7 @@ export default {
       let index = this.$store.state.readingBook.index;
       index--;
       if (typeof this.$store.state.readingBook.catalog[index] !== "undefined") {
-        this.$message.info("上一章");
+        this.$store.state.readingBook.chapterPos = 0;
         this.getContent(index);
       } else {
         this.$message.error("本章是第一章");
