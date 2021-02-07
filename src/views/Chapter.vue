@@ -173,63 +173,58 @@ export default {
         window.console.log(newBook.durChapterTime);
         window.console.log(chapterIndex);
         window.console.log(chapterPos);
-        if (book == null || chapterIndex > 0) {
-          book = {
-            bookName: bookName,
-            bookUrl: bookUrl,
-            index: chapterIndex,
-            chapterPos: chapterPos
-          };
-          localStorage.setItem(bookUrl, JSON.stringify(book));
-          this.getCatalog(bookUrl);
-          window.addEventListener("scroll", this.handleScroll);
-          window.addEventListener("keyup", function(event) {
-            let t = new Date().getTime();
-            switch (event.key) {
-              case "ArrowLeft":
+        book = {
+          bookName: bookName,
+          bookUrl: bookUrl,
+          index: chapterIndex,
+          chapterPos: chapterPos
+        };
+        localStorage.setItem(bookUrl, JSON.stringify(book));
+        this.getCatalog(bookUrl);
+        window.addEventListener("scroll", this.handleScroll);
+        window.addEventListener("keyup", function(event) {
+          let t = new Date().getTime();
+          switch (event.key) {
+            case "ArrowLeft":
+              event.stopPropagation();
+              event.preventDefault();
+              that.toLastChapter();
+              break;
+            case "ArrowRight":
+              event.stopPropagation();
+              event.preventDefault();
+              that.toNextChapter();
+              break;
+            case "ArrowUp":
+              if (t - this.oldT2 > 500) {
                 event.stopPropagation();
                 event.preventDefault();
-                that.toLastChapter();
-                break;
-              case "ArrowRight":
+                if (document.documentElement.scrollTop === 0) {
+                  that.$message.warning("已到达页面顶部");
+                } else {
+                  jump(0 - document.documentElement.clientHeight + 200);
+                }
+                this.oldT2 = t;
+              }
+              break;
+            case "ArrowDown":
+              if (t - this.oldT2 > 500) {
                 event.stopPropagation();
                 event.preventDefault();
-                that.toNextChapter();
-                break;
-              case "ArrowUp":
-                if (t - this.oldT2 > 500) {
-                  event.stopPropagation();
-                  event.preventDefault();
-                  if (document.documentElement.scrollTop === 0) {
-                    that.$message.warning("已到达页面顶部");
-                  } else {
-                    jump(0 - document.documentElement.clientHeight + 200);
-                  }
-                  this.oldT2 = t;
+                if (
+                  document.documentElement.clientHeight +
+                    document.documentElement.scrollTop ===
+                  document.documentElement.scrollHeight
+                ) {
+                  that.$message.warning("已到达页面底部");
+                } else {
+                  jump(document.documentElement.clientHeight - 200);
                 }
-                break;
-              case "ArrowDown":
-                if (t - this.oldT2 > 500) {
-                  event.stopPropagation();
-                  event.preventDefault();
-                  if (
-                    document.documentElement.clientHeight +
-                      document.documentElement.scrollTop ===
-                    document.documentElement.scrollHeight
-                  ) {
-                    that.$message.warning("已到达页面底部");
-                  } else {
-                    jump(document.documentElement.clientHeight - 200);
-                  }
-                  this.oldT2 = t;
-                }
-                break;
-            }
-          });
-        } else {
-          that.loading.close();
-          that.$message.error("获取书籍失败");
-        }
+                this.oldT2 = t;
+              }
+              break;
+          }
+        });
       },
       err => {
         that.loading.close();
