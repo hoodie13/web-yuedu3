@@ -358,13 +358,13 @@ export default {
       let scrollY = window.scrollY;
       let t = new Date().getTime();
       //阅读超过1分钟保存一次阅读进度
-      if (scrollY - this.oldY > 500 && t - this.oldT > 30000) {
+      if (scrollY - this.oldY > 1000 && t - this.oldT > 60000) {
         this.oldT = t;
         this.oldY = scrollY;
-        this.saveRecord();
+        this.saveRecord(false);
       }
     },
-    saveRecord() {
+    saveRecord(showInfo) {
       let totalH =
         document.body.scrollHeight || document.documentElement.scrollHeight;
       let clientH = window.innerHeight || document.documentElement.clientHeight;
@@ -398,9 +398,11 @@ export default {
         this.$store.state.readingBook.chapterPos = pos;
         this.oldT = new Date().getTime();
         this.oldY = window.scrollY;
-        this.$message.info(
-          "正在保存阅读进度到本地，进度索引为[" + index + "." + pos + "]。"
-        );
+        if (showInfo) {
+          this.$message.info(
+            "正在保存阅读进度到本地，进度索引为[" + index + "." + pos + "]。"
+          );
+        }
       }
     },
     getBook(bookUrl) {
@@ -537,7 +539,7 @@ export default {
     },
     toShelf() {
       this.$router.push("/");
-      this.saveRecord();
+      this.saveRecord(true);
     }
   }
 };
