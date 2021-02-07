@@ -160,7 +160,7 @@ export default {
         let newBook = res.data.data;
         let bookName = newBook.name;
         var chapterIndex = 0;
-        let chapterPos = 0;
+        var chapterPos = 0;
         if (newBook.webDurChapterTime > newBook.durChapterTime) {
           chapterIndex = newBook.webChapterIndex;
           chapterPos = newBook.webChapterPos;
@@ -168,11 +168,16 @@ export default {
           chapterIndex = newBook.durChapterIndex;
           chapterPos = newBook.durChapterPos;
         }
-        window.console.log("getBook");
-        window.console.log(newBook.webDurChapterTime);
-        window.console.log(newBook.durChapterTime);
-        window.console.log(chapterIndex);
-        window.console.log(chapterPos);
+        window.console.log(
+          "getBook webDurChapterTime is " +
+            newBook.webDurChapterTime +
+            " durChapterTime is " +
+            newBook.durChapterTime +
+            " chapterIndex is " +
+            chapterIndex +
+            " chapterPos is " +
+            chapterPos
+        );
         book = {
           bookName: bookName,
           bookUrl: bookUrl,
@@ -374,12 +379,7 @@ export default {
       if (pos == null) pos = 0;
       if (chapterIndex != null) {
         window.console.log(
-          "chapterIndex is " +
-            chapterIndex +
-            " len is " +
-            len +
-            " pos is " +
-            pos
+          "saveRecord chapterIndex is " + chapterIndex + " pos is " + pos
         );
         Axios.get(
           "/saveReadRecord?url=" +
@@ -412,9 +412,6 @@ export default {
           book.catalog = catalog;
           that.$store.commit("setReadingBook", book);
           var index = that.$store.state.readingBook.index || 0;
-          window.console.log("getCatalog");
-          window.console.log(index);
-          window.console.log(book.chapterPos);
           this.getContent(index);
         },
         err => {
