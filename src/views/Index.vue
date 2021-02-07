@@ -154,8 +154,8 @@ export default {
         that.$store.commit(
           "addBooks",
           response.data.data.sort(function(a, b) {
-            var x = a["durChapterTime"] || 0;
-            var y = b["durChapterTime"] || 0;
+            var x = a["webDurChapterTime"] || 0;
+            var y = b["webDurChapterTime"] || 0;
             return y - x;
           })
         );
