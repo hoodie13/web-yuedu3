@@ -476,7 +476,7 @@ export default {
           that.noPoint = false;
           that.$store.commit("setShowContent", true);
           let pos = this.$store.state.readingBook.chapterPos;
-          if (pos != 0) {
+          if (pos > 100) {
             this.$message.info(
               "当前章最新进度索引为[" +
                 index +
