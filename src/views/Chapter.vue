@@ -138,13 +138,16 @@ export default {
     //获取书籍数据
     const that = this;
     let bookUrl = sessionStorage.getItem("bookUrl");
-    let bookName = sessionStorage.getItem("bookName");
     var book = JSON.parse(localStorage.getItem(bookUrl));
     this.getBook(bookUrl).then(
       res => {
         let newBook = res.data.data;
+        let bookName = newBook.name;
         let chapterIndex = newBook.durChapterIndex;
         let chapterPos = newBook.durChapterPos;
+        window.console.log("getBook");
+        window.console.log(chapterIndex);
+        window.console.log(chapterPos);
         if (book == null || chapterIndex > 0) {
           book = {
             bookName: bookName,
@@ -153,69 +156,59 @@ export default {
             chapterPos: chapterPos
           };
           localStorage.setItem(bookUrl, JSON.stringify(book));
+          this.getCatalog(bookUrl);
+          window.addEventListener("scroll", this.handleScroll);
+          window.addEventListener("keyup", function(event) {
+            let t = new Date().getTime();
+            switch (event.key) {
+              case "ArrowLeft":
+                event.stopPropagation();
+                event.preventDefault();
+                that.toLastChapter();
+                break;
+              case "ArrowRight":
+                event.stopPropagation();
+                event.preventDefault();
+                that.toNextChapter();
+                break;
+              case "ArrowUp":
+                if (t - this.oldT2 > 500) {
+                  event.stopPropagation();
+                  event.preventDefault();
+                  if (document.documentElement.scrollTop === 0) {
+                    that.$message.warning("已到达页面顶部");
+                  } else {
+                    jump(0 - document.documentElement.clientHeight + 200);
+                  }
+                  this.oldT2 = t;
+                }
+                break;
+              case "ArrowDown":
+                if (t - this.oldT2 > 500) {
+                  event.stopPropagation();
+                  event.preventDefault();
+                  if (
+                    document.documentElement.clientHeight +
+                      document.documentElement.scrollTop ===
+                    document.documentElement.scrollHeight
+                  ) {
+                    that.$message.warning("已到达页面底部");
+                  } else {
+                    jump(document.documentElement.clientHeight - 200);
+                  }
+                  this.oldT2 = t;
+                }
+                break;
+            }
+          });
+        } else {
+          that.loading.close();
+          that.$message.error("获取书籍失败");
         }
       },
       err => {
         that.loading.close();
         that.$message.error("获取书籍失败");
-        throw err;
-      }
-    );
-    this.getCatalog(bookUrl).then(
-      res => {
-        let catalog = res.data.data;
-        book.catalog = catalog;
-        that.$store.commit("setReadingBook", book);
-        var index = that.$store.state.readingBook.index || 0;
-        this.getContent(index);
-        window.addEventListener("scroll", this.handleScroll);
-        window.addEventListener("keyup", function(event) {
-          let t = new Date().getTime();
-          switch (event.key) {
-            case "ArrowLeft":
-              event.stopPropagation();
-              event.preventDefault();
-              that.toLastChapter();
-              break;
-            case "ArrowRight":
-              event.stopPropagation();
-              event.preventDefault();
-              that.toNextChapter();
-              break;
-            case "ArrowUp":
-              if (t - this.oldT2 > 500) {
-                event.stopPropagation();
-                event.preventDefault();
-                if (document.documentElement.scrollTop === 0) {
-                  that.$message.warning("已到达页面顶部");
-                } else {
-                  jump(0 - document.documentElement.clientHeight + 200);
-                }
-                this.oldT2 = t;
-              }
-              break;
-            case "ArrowDown":
-              if (t - this.oldT2 > 500) {
-                event.stopPropagation();
-                event.preventDefault();
-                if (
-                  document.documentElement.clientHeight +
-                    document.documentElement.scrollTop ===
-                  document.documentElement.scrollHeight
-                ) {
-                  that.$message.warning("已到达页面底部");
-                } else {
-                  jump(document.documentElement.clientHeight - 200);
-                }
-                this.oldT2 = t;
-              }
-              break;
-          }
-        });
-      },
-      err => {
-        that.loading.close();
-        that.$message.error("获取书籍目录失败");
         throw err;
       }
     );
@@ -386,7 +379,26 @@ export default {
       return Axios.get("/getBook?url=" + encodeURIComponent(bookUrl));
     },
     getCatalog(bookUrl) {
-      return Axios.get("/getChapterList?url=" + encodeURIComponent(bookUrl));
+      let that = this;
+      Axios.get("/getChapterList?url=" + encodeURIComponent(bookUrl)).then(
+        res => {
+          let catalog = res.data.data;
+          let book = JSON.parse(localStorage.getItem(bookUrl));
+          book.catalog = catalog;
+          that.$store.commit("setReadingBook", book);
+          var index = that.$store.state.readingBook.index || 0;
+          window.console.log("getCatalog");
+          window.console.log(book.index);
+          window.console.log(index);
+          window.console.log(book.chapterPos);
+          this.getContent(index);
+        },
+        err => {
+          that.loading.close();
+          that.$message.error("获取书籍目录失败");
+          throw err;
+        }
+      );
     },
     getContent(index) {
       //展示进度条
