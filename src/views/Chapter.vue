@@ -505,9 +505,10 @@ export default {
       let chapterPos = this.$store.state.readingBook.chapterPos;
       let scrollH = (validH * chapterPos) / len;
       document.documentElement.scrollTop = scrollH;
+      /*
       this.$message.info(
         "同步阅读进度到最近处，进度索引为[" + index + "." + chapterPos + "]。"
-      );
+      );*/
     },
     toTop() {
       jump(this.$refs.top);
@@ -539,7 +540,7 @@ export default {
     },
     toShelf() {
       this.$router.push("/");
-      this.saveRecord(true);
+      this.saveRecord(false);
     }
   }
 };

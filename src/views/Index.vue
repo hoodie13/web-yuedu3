@@ -79,11 +79,7 @@
             "
           >
             <div class="cover-img">
-              <img
-                class="cover"
-                :src="getCover(book) || require('../assets/imgs/cover2.jpg')"
-                alt=""
-              />
+              <img class="cover" :src="getCover(book)" alt="" />
             </div>
             <div
               class="info"
@@ -179,8 +175,13 @@ export default {
     getCover(book) {
       if (book.bookUrl.endsWith(".epub") || book.bookUrl.endsWith(".txt")) {
         return require("../assets/imgs/cover1.jpg");
+      } else if (
+        !book.coverUrl.endsWith(".jpg") &&
+        !book.coverUrl.endsWith(".jpeg")
+      ) {
+        return require("../assets/imgs/cover2.jpg");
       } else {
-        return book.coverUrl;
+        return book.coverUrl || require("../assets/imgs/cover2.jpg");
       }
     },
     setIP() {},
