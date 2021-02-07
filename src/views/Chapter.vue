@@ -54,6 +54,22 @@
           </div>
           <div class="icon-text">书架</div>
         </div>
+        <div
+          class="tool-icon"
+          :class="{ 'no-point': noPoint }"
+          @click="saveRecord"
+        >
+          <div class="iconfont">
+            &#58957;
+          </div>
+          <div class="icon-text">保存</div>
+        </div>
+        <div class="tool-icon" :class="{ 'no-point': noPoint }" @click="toNew">
+          <div class="iconfont">
+            &#58890;
+          </div>
+          <div class="icon-text">同步</div>
+        </div>
         <div class="tool-icon" :class="{ 'no-point': noPoint }" @click="toTop">
           <div class="iconfont">
             &#58914;
@@ -69,22 +85,6 @@
             &#58915;
           </div>
           <div class="icon-text">底部</div>
-        </div>
-        <div
-          class="tool-icon"
-          :class="{ 'no-point': noPoint }"
-          @click="saveRecord"
-        >
-          <div class="iconfont">
-            &#58971;
-          </div>
-          <div class="icon-text">保存</div>
-        </div>
-        <div class="tool-icon" :class="{ 'no-point': noPoint }" @click="toNew">
-          <div class="iconfont">
-            &#58971;
-          </div>
-          <div class="icon-text">同步</div>
         </div>
       </div>
     </div>
