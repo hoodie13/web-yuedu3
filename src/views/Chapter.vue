@@ -68,7 +68,23 @@
           <div class="iconfont">
             &#58915;
           </div>
-          <div class="icon-text">最新</div>
+          <div class="icon-text">底部</div>
+        </div>
+        <div
+          class="tool-icon"
+          :class="{ 'no-point': noPoint }"
+          @click="saveRecord"
+        >
+          <div class="iconfont">
+            &#58971;
+          </div>
+          <div class="icon-text">保存</div>
+        </div>
+        <div class="tool-icon" :class="{ 'no-point': noPoint }" @click="toNew">
+          <div class="iconfont">
+            &#58971;
+          </div>
+          <div class="icon-text">同步</div>
         </div>
       </div>
     </div>
@@ -154,7 +170,7 @@ export default {
         }
         window.console.log("getBook");
         window.console.log(newBook.webDurChapterTime);
-        window.console.log(newBook.durChapterTim);
+        window.console.log(newBook.durChapterTime);
         window.console.log(chapterIndex);
         window.console.log(chapterPos);
         if (book == null || chapterIndex > 0) {
@@ -457,9 +473,15 @@ export default {
           let pos = this.$store.state.readingBook.chapterPos;
           if (pos != 0) {
             this.$message.info(
-              "当前章最新进度索引为" + pos + "，请点击最新进行阅读"
+              "当前章最新进度索引为[" +
+                index +
+                "." +
+                pos +
+                "]，请点击同步跳转阅读"
             );
           }
+          this.oldT = new Date().getTime();
+          this.oldY = window.scrollY;
         },
         err => {
           that.$message.error("获取章节内容失败");
@@ -468,10 +490,7 @@ export default {
         }
       );
     },
-    toTop() {
-      jump(this.$refs.top);
-    },
-    toBottom() {
+    toNew() {
       let totalH =
         document.body.scrollHeight || document.documentElement.scrollHeight;
       let clientH = window.innerHeight || document.documentElement.clientHeight;
@@ -481,6 +500,12 @@ export default {
       let chapterPos = this.$store.state.readingBook.chapterPos;
       let scrollH = (validH * chapterPos) / len;
       document.documentElement.scrollTop = scrollH;
+    },
+    toTop() {
+      jump(this.$refs.top);
+    },
+    toBottom() {
+      jump(this.$refs.bottom);
     },
     toNextChapter() {
       this.$store.commit("setContentLoading", true);
