@@ -398,6 +398,9 @@ export default {
         this.$store.state.readingBook.chapterPos = pos;
         this.oldT = new Date().getTime();
         this.oldY = window.scrollY;
+        this.$message.info(
+          "正在保存阅读进度到本地，进度索引为[" + index + "." + pos + "]。"
+        );
       }
     },
     getBook(bookUrl) {
@@ -500,6 +503,9 @@ export default {
       let chapterPos = this.$store.state.readingBook.chapterPos;
       let scrollH = (validH * chapterPos) / len;
       document.documentElement.scrollTop = scrollH;
+      this.$message.info(
+        "同步阅读进度到最近处，进度索引为[" + index + "." + chapterPos + "]。"
+      );
     },
     toTop() {
       jump(this.$refs.top);
