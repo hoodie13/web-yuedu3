@@ -143,9 +143,18 @@ export default {
       res => {
         let newBook = res.data.data;
         let bookName = newBook.name;
-        let chapterIndex = newBook.durChapterIndex;
-        let chapterPos = newBook.durChapterPos;
+        var chapterIndex = 0;
+        let chapterPos = 0;
+        if (newBook.webDurChapterTime > newBook.durChapterTime) {
+          chapterIndex = newBook.webChapterIndex;
+          chapterPos = newBook.webChapterPos;
+        } else {
+          chapterIndex = newBook.durChapterIndex;
+          chapterPos = newBook.durChapterPos;
+        }
         window.console.log("getBook");
+        window.console.log(newBook.webDurChapterTime);
+        window.console.log(newBook.durChapterTim);
         window.console.log(chapterIndex);
         window.console.log(chapterPos);
         if (book == null || chapterIndex > 0) {
@@ -388,7 +397,6 @@ export default {
           that.$store.commit("setReadingBook", book);
           var index = that.$store.state.readingBook.index || 0;
           window.console.log("getCatalog");
-          window.console.log(book.index);
           window.console.log(index);
           window.console.log(book.chapterPos);
           this.getContent(index);
