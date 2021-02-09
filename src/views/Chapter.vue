@@ -230,13 +230,22 @@ export default {
               }
               break;
             case "s":
-              that.saveRecord(true);
+              if (t - this.oldT2 > 2000) {
+                that.saveRecord(true);
+                this.oldT2 = t;
+              }
               break;
             case "n":
-              that.toNew();
+              if (t - this.oldT2 > 2000) {
+                that.toNew();
+                this.oldT2 = t;
+              }
               break;
             case "m":
-              that.setBookmark();
+              if (t - this.oldT2 > 2000) {
+                that.setBookmark();
+                this.oldT2 = t;
+              }
               break;
           }
         });
