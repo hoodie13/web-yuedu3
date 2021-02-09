@@ -513,20 +513,23 @@ export default {
       );*/
     },
     setBookmark() {
-      let totalH =
-        document.body.scrollHeight || document.documentElement.scrollHeight;
-      let clientH = window.innerHeight || document.documentElement.clientHeight;
-      let validH = totalH - clientH;
-      let scrollH =
-        document.body.scrollTop || document.documentElement.scrollTop;
+      let that = this;
       let index = this.$store.state.readingBook.index;
-      let len = this.$store.state.readingBook.catalog[index].len;
       let chapterIndex = this.$store.state.readingBook.catalog[index].index;
-      let pos = ((len * scrollH) / validH).toFixed(0);
+      let title = this.$store.state.readingBook.catalog[index].title;
       let bookUrl = sessionStorage.getItem("bookUrl");
-      let bookText = window.getSelection().toString();
+      let bookText = window
+        .getSelection()
+        .toString()
+        .trim();
       if (bookText != "") {
-        window.console.log(bookText);
+        let pos = title.length + that.content.join("\n").indexOf(bookText);
+        window.console.log(
+          "setBookmark chapterIndex is " +
+            chapterIndex +
+            " chapterPos is " +
+            pos
+        );
         Axios.get(
           "/setBookmark?url=" +
             encodeURIComponent(bookUrl) +
