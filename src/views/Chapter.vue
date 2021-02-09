@@ -188,6 +188,7 @@ export default {
         this.getCatalog(bookUrl);
         window.addEventListener("scroll", this.handleScroll);
         window.addEventListener("keyup", function(event) {
+          window.console.log("Event key is " + event.key);
           let t = new Date().getTime();
           switch (event.key) {
             case "ArrowLeft":
@@ -227,6 +228,15 @@ export default {
                 }
                 this.oldT2 = t;
               }
+              break;
+            case "s":
+              that.saveRecord(true);
+              break;
+            case "n":
+              that.toNew();
+              break;
+            case "m":
+              that.setBookmark();
               break;
           }
         });
@@ -501,6 +511,38 @@ export default {
       this.$message.info(
         "同步阅读进度到最近处，进度索引为[" + index + "." + chapterPos + "]。"
       );*/
+    },
+    setBookmark() {
+      let totalH =
+        document.body.scrollHeight || document.documentElement.scrollHeight;
+      let clientH = window.innerHeight || document.documentElement.clientHeight;
+      let validH = totalH - clientH;
+      let scrollH =
+        document.body.scrollTop || document.documentElement.scrollTop;
+      let index = this.$store.state.readingBook.index;
+      let len = this.$store.state.readingBook.catalog[index].len;
+      let chapterIndex = this.$store.state.readingBook.catalog[index].index;
+      let pos = ((len * scrollH) / validH).toFixed(0);
+      let bookUrl = sessionStorage.getItem("bookUrl");
+      let bookText = window.getSelection().toString();
+      if (bookText != "") {
+        window.console.log(bookText);
+        Axios.get(
+          "/setBookmark?url=" +
+            encodeURIComponent(bookUrl) +
+            "&chapterIndex=" +
+            chapterIndex +
+            "&pos=" +
+            pos +
+            "&bookText=" +
+            bookText
+        );
+        this.$store.state.readingBook.chapterIndex = chapterIndex;
+        this.$store.state.readingBook.chapterPos = pos;
+        this.oldT = new Date().getTime();
+        this.oldY = window.scrollY;
+        this.$message.info("正在保存书签");
+      }
     },
     toTop() {
       jump(this.$refs.top);
